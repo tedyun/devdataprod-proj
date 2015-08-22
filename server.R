@@ -93,5 +93,7 @@ shinyServer(
         output$optionText1 <- renderText(questionData[[1]]$country)
         output$optionText2 <- renderText(questionData[[2]]$country)
         output$answerText <- renderText(generateAnswerText(questionData))
+        userAnswer <- reactive({ input$answer })
+        output$userAnswer <- renderPrint(userAnswer())
     }
 )
