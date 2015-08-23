@@ -7,6 +7,8 @@
 </head>
 <body>
   <h1>Test your knowledge about country statistics.</h1>
+  <hr>
+  
   <h2 id="questionText" class="shiny-text-output"></h2>
   
   <div id="answer" class="form-group shiny-input-radiogroup shiny-input-container">
@@ -25,10 +27,15 @@
       </div>
     </div>
   </div>
-  <p><span id="checkAnswer" class="shiny-text-output" style="font-weight: bold;"></span> <span id="answerText" class="shiny-text-output"></span></span></p>
+  <p>
+    <span id="checkAnswer" class="shiny-text-output" style="font-weight: bold; color: blue;"></span>
+	 <span id="answerText" class="shiny-text-output"></span>
+  </p>
   <button id="refreshpage">Next Question</button>
+  <p>Please click on one of the radio buttons above. The answer will be shown after you pick your answer.</p>
   <p>Questions are automatically generated from <a href="http://stats.oecd.org/" target="_blank">OECD</a> Factbook 2014 data.</p>
-
+  <div id="answerPlot" class="shiny-plot-output"></div>
+  
 <script>
 var elRefreshButton = document.getElementById("refreshpage");
 elRefreshButton.onclick = function () {

@@ -1,4 +1,5 @@
-library("shiny")
+library(shiny)
+library(ggplot2)
 
 #countryNames <- unique(factbookData$Country)
 #countryNames <- as.vector(countryNames)
@@ -107,8 +108,12 @@ shinyServer(
         qIndex <- getRandomStatIndex()
         output$questionText <- renderText(generateQuestionText(qIndex))
         questionData <- generateQuestionData(getStatKey(qIndex))
-        output$optionText1 <- renderText(questionData[[1]]$country)
-        output$optionText2 <- renderText(questionData[[2]]$country)
+        country1 <- questionData[[1]]$country
+        country2 <- questionData[[2]]$country
+        value1 <- questionData[[1]]$value
+        value2 <- questionData[[2]]$value
+        output$optionText1 <- renderText(country1)
+        output$optionText2 <- renderText(country2)
         output$checkAnswer <- renderText({ 
             if (length(input$answer) == 0)
                 ""
@@ -123,5 +128,21 @@ shinyServer(
             else
                 generateAnswerText(questionData)
         })
+        output$answerPlot <- renderPlot({
+            xValues <- c(country1, country2)
+            yValues <- c(value1, value2)
+            if (length(input$answer) == 0)
+                NULL
+            else
+                qplot(xValues, yValues, geom="bar",
+                      main=statNames[qIndex], stat="identity",
+                      xlab="", ylab=questionData$unit) +
+                theme(
+                    panel.background = element_rect(fill = "transparent",colour = NA),
+                    panel.grid.minor = element_blank(), 
+                    panel.grid.major = element_blank(),
+                    plot.background = element_rect(fill = "transparent",colour = NA)
+                )
+        }, width=400, height=300, bg="transparent")
     }
 )
