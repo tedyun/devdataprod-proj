@@ -1,11 +1,10 @@
 library("shiny")
 
-factbookData <- read.csv("FACTBOOK2014_2012.csv", header=TRUE)
-names(factbookData)[1] <- "SUB"
-countryNames <- unique(factbookData$Country)
-countryNames <- as.vector(countryNames)
+#countryNames <- unique(factbookData$Country)
+#countryNames <- as.vector(countryNames)
+
 # remove last four group stats
-countryNames <- countryNames[0:(length(countryNames) - 4)]
+#countryNames <- countryNames[0:(length(countryNames) - 4)]
 
 statKeys <- c(
     "SIZEGDP_T2",
@@ -21,6 +20,17 @@ statNames <- c(
     "Electricity Generation",
     "Average Hours Worked"
 )
+
+excludeCountries <- c(
+    "OECD - Total",
+    "OECD - Average",
+    "Euro area (17 countries)",
+    "European Union (28 countries)"
+)
+
+factbookData <- read.csv("FACTBOOK2014_2012.csv", header=TRUE)
+names(factbookData)[1] <- "SUB"
+factbookData <- factbookData[-which(factbookData$Country %in% excludeCountries),]
 
 # sample k integer from 0 to n-1
 sampleIntegers <- function(n, k){
@@ -58,7 +68,14 @@ generateQuestionData <- function (statKey) {
     }
     
     result$unit <- unit
-    return(result)
+    
+    result$answer <- if (result1$value > result2$value) "opt1"
+                     else if (result1$value < result2$value) "opt2"
+                     else "unknown"
+    return(
+        if (result$answer != "unknown") result
+        else generateQuestionData(statKey)
+    )
 }
 
 generateQuestionText <- function (qIndex) {
@@ -92,8 +109,19 @@ shinyServer(
         questionData <- generateQuestionData(getStatKey(qIndex))
         output$optionText1 <- renderText(questionData[[1]]$country)
         output$optionText2 <- renderText(questionData[[2]]$country)
-        output$answerText <- renderText(generateAnswerText(questionData))
-        userAnswer <- reactive({ input$answer })
-        output$userAnswer <- renderPrint(userAnswer())
+        output$checkAnswer <- renderText({ 
+            if (length(input$answer) == 0)
+                ""
+            else if (input$answer == questionData$answer)
+                "Correct."
+            else
+                "Incorrect."
+        })
+        output$answerText <- renderText({ 
+            if (length(input$answer) == 0)
+                ""
+            else
+                generateAnswerText(questionData)
+        })
     }
 )
